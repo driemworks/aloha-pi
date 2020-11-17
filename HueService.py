@@ -45,7 +45,7 @@ def authorized_put(ip, username, resource, body):
         res = requests.put(url, json=body)
         return res.json()
     except Exception as e:
-        raise SystemExit('uhoh')
+        raise SystemExit('HTTP PUT failed with reason: {}'.format(e))
     
 
 

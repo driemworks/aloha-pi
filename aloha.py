@@ -8,6 +8,7 @@ import asyncio
 import HueService as hs
 import VizioService as vs
 from pyvizio import VizioAsync
+import ApiService as api
 
 # my ip address
 my_phone_ip = '192.168.1.220'
@@ -54,6 +55,37 @@ def continuous_monitoring(fault_tolerance_threshold, bridge_ip,
         prev_state = curr_state
 
 
+
+def continuous_monitoring_test(ip, port, token, fault_tolerance_threshold, bridge_ip, username, home_scene, away_scene):
+    printd('Start monitoring')
+    prev_state = False
+    faults = 0
+    sleep_time = 0
+    while True:
+        time.sleep(sleep_time)
+        curr_state = vs.is_power_on(ip, port, token)
+        if curr_state is False:
+            sleep_time = 1
+            if faults == fault_tolerance_threshold:
+                # away behavior
+                printd('Goodbye')
+                faults = faults + 1
+                hs.set_scene(bridge_ip, username, away_scene, True)
+            elif faults < fault_tolerance_threshold:
+                # disconnected but awaiting fault tolerance check
+                faults = faults + 1
+                #printd('ping failed: failed pings = {}'.format(failed_pings))
+        else:
+            faults = 0
+            if prev_state is False:
+                printd('Welcome home!')
+                sleep_time = 2
+                hs.set_scene(bridge_ip, username, home_scene, True)
+
+        prev_state = curr_state
+
+
+
 def main():
     bridge_ip = hs.discover_bridge()
     printd('Discovered hue bridge at {}'.format(bridge_ip))
@@ -70,26 +102,41 @@ def main():
         else:
             printd('Username not found - authorize with the bridge')
             username = hs.connect_to_bridge(bridge_ip)
-            #username = '4ji63pf-CrZFhlA1ewzj4uEMMqxuzh-mFT0ZwUFM'
             uname_file = open(uname_path, 'x')
             uname_file.write(username)
-        #groups = hs.authorized_get(bridge_ip, username, 'groups')
-        # i only have group = 1
-        #for g in groups:
-        #    print(g + ': ' + groups[g]['name'])
+            
+        # load scenes
         scenes = hs.authorized_get(bridge_ip, username, 'scenes')
         scenes_dict = {}
         for s in scenes:
             scenes_dict[scenes[s]['name']] = s
-            #print(s + ': ' +  scenes[s]['name'])
-        continuous_monitoring(fault_tolerance, bridge_ip, username, scenes_dict['default'], scenes_dict['Relax'])
+        
+        # TODO - CAVEAT: the raspberry pi only has four cores
+        # option 1: run separate threads for each device/event/api we want to monitor
+        # option 2: monitor based on timer events
+        
+        #continuous_monitoring(fault_tolerance, bridge_ip, username, scenes_dict['default'], scenes_dict['Relax'])
+        # TODO - store auth token same way as username
+        loop = asyncio.get_event_loop()
+        devices = loop.run_until_complete(vs.scan_vizio())
+        loop.close()
+        d = devices[0]
+        ip = d.ip
+        port = d.port
+        vizio_auth_token = vs.pair(devices[0])
+        continuous_monitoring_test(ip, port, vizio_auth_token, 1, bridge_ip, username, scenes_dict['spicy'], scenes_dict['default'])
     else:
         raise SystemExit('Bridge not reachable - Goodbye') 
 
 
 if __name__ == "__main__":
     #vs.discover_vizio()
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(vs.scan_vizio())
-    loop.close()
-    #main()
+    #loop = asyncio.get_event_loop()
+    #devices = loop.run_until_complete(vs.scan_vizio())
+    #loop.close()
+    #d = devices[0]
+    #ip = d.ip
+    #port = d.port
+    #vizio_auth_token = vs.pair(devices[0])
+    #continuous_monitoring_test(ip, port, vizio_auth_token, 3, )
+    main()
