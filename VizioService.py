@@ -18,8 +18,6 @@ def pair(d):
             'DEVICE_NAME': 'ALOHA',
             'DEVICE_ID': '123456'
         })
-    print(res.json())
-    print(res.json()['ITEM'])
     if res.status_code == 200:
         try:
             # TODO - if multiple requests for pairing made before vizio timeout
