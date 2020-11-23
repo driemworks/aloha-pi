@@ -46,7 +46,13 @@ def authorized_put(ip, username, resource, body):
         return res.json()
     except Exception as e:
         raise SystemExit('HTTP PUT failed with reason: {}'.format(e))
-    
+
+
+def apply_action(bridge_ip, username, action):
+    try:
+        authorized_put(bridge_ip, username, 'groups/1/action', action)
+    except Exception as e:
+        print('could not apply action: {}'.format(e))
 
 
 def set_scene(bridge_ip, username, scene_id, state):
@@ -54,3 +60,11 @@ def set_scene(bridge_ip, username, scene_id, state):
         'on': state,
         'scene': scene_id
     })
+
+
+def get_current_scene(bridge_ip, username):
+    try:
+        return authorized_get(bridge_ip, username, 'groups/1')
+    except Exception as e:
+        print('Could not get current scene: {}'.format(e))
+        return 'default'

@@ -16,9 +16,21 @@ my_phone_ip = '192.168.1.220'
 vizio_ip = ''
 vizio_port = ''
 vizio_token = ''
-# failed ping count must exceed this number before away behavior is activated
-fault_tolerance = 5
 nmap = nmap3.NmapScanTechniques()
+
+bridge_ip = ''
+username = ''
+scenes_dict = {}
+current_scene_action = {}
+
+#############################################################
+# TODOS
+# 1) create classes for hue service/vizio service that can store tokens/ip/port
+# 2) cleanup
+# 3) fix issue with vizio off behavior
+# 4) ssl cert for vizio
+# 5) ???
+#############################################################
 
 def is_connected():
     results = nmap.nmap_ping_scan(my_phone_ip)
@@ -26,6 +38,7 @@ def is_connected():
 
 
 def is_vizio_connected():
+    #print(vs.get_selected_input(vizio_ip, vizio_port, vizio_token))
     return vs.is_power_on(vizio_ip, vizio_port, vizio_token)
 
 
@@ -33,7 +46,29 @@ def printd(message):
     print('{} - {}'.format(datetime.now(), message))
 
 
-def main():
+def load_vizio_data():
+    vizio_data_path = 'vizio.txt'
+    global vizio_ip
+    global vizio_port
+    global vizio_token
+    if path.exists(vizio_data_path):
+        printd('Reading locally stored vizio data')
+        vizio_data_file = open(vizio_data_path)
+        vizio_data =  vizio_data_file.readlines()
+        vizio_ip = vizio_data[0].replace('\n', '')
+        vizio_port = vizio_data[1].replace('\n', '')
+        vizio_token = vizio_data[2].replace('\n', '')
+    else:
+        vizio_ip, vizio_port, vizio_token = vs.scan_and_get_device()
+        vizio_data_file = open(vizio_data_path, 'x')
+        vizio_data_file.write(str(vizio_ip))
+        vizio_data_file.write('\n')
+        vizio_data_file.write(str(vizio_port))
+        vizio_data_file.write('\n')
+        vizio_data_file.write(str(vizio_token))
+
+
+def load_hue_data():
     bridge_ip = hs.discover_bridge()
     printd('Discovered hue bridge at {}'.format(bridge_ip))
     # check if bridge is reachable
@@ -51,34 +86,61 @@ def main():
             username = hs.connect_to_bridge(bridge_ip)
             uname_file = open(uname_path, 'x')
             uname_file.write(username)
-            
-        # load scenes
-        scenes = hs.authorized_get(bridge_ip, username, 'scenes')
-        scenes_dict = {}
-        for s in scenes:
-            scenes_dict[scenes[s]['name']] = s
-        # store/read from disk
-        # TODO - move this to its own function
-        loop = asyncio.get_event_loop()
-        devices = loop.run_until_complete(vs.scan_vizio())
-        d = devices[0]
-        global vizio_ip
-        vizio_ip = d.ip
-        global vizio_port
-        vizio_port = d.port
-        global vizio_token
-        vizio_token = vs.pair(devices[0])
-
-        routines.continuous_monitoring_multiple(routines.HueConfig(bridge_ip, username, scenes_dict),
-                             routines=[routines.RoutineConfig(is_connected, 5,
-                                                              'default', 60,
-                                                              'Relax', 5),
-                             routines.RoutineConfig(is_vizio_connected, 1,
-                                                  'spicy', 2,
-                                                  'Relax', 2)])
     else:
-        raise SystemExit('Bridge not reachable - Goodbye') 
+        raise SystemExit('Bridge not reachable - Goodbye')
+    
+    return bridge_ip, username
+
+
+def phone_home_behavior():
+    set_scene('default')
+
+
+def phone_away_behavior():
+    set_scene('Relax')
+    
+    
+def vizio_on_behavior():
+    # check if there is a currently selected scene - this will be important for
+    # the vizio_off_behavior later one
+    global current_scene_action
+    current_scene_action = hs.get_current_scene(bridge_ip, username)['action']
+    print('*********')
+    print(current_scene_action)
+    if vs.get_selected_input(vizio_ip, vizio_port, vizio_token)['ITEMS'][0]['VALUE'] == 'cast':
+        set_scene('theater')
+    else:
+        set_scene('game')
+    
+
+def vizio_off_behavior():
+    print('turning vizio off')
+    print(current_scene_action)
+    hs.apply_action(bridge_ip, username, current_scene_action)
+
+
+def set_scene(name):
+    hs.set_scene(bridge_ip, username, scenes_dict[name], True)
+
+
+def main():
+    global bridge_ip
+    global username
+    bridge_ip, username = load_hue_data()
+    
+    load_vizio_data()   
+    # load scenes
+    scenes = hs.authorized_get(bridge_ip, username, 'scenes')
+    global scenes_dict
+    for s in scenes:
+        scenes_dict[scenes[s]['name']] = s
+
+    routines.continuous_monitoring_multiple(routines.HueConfig(bridge_ip, username, scenes_dict),
+            routines=[routines.RoutineConfig('Phone Routine', is_connected, 2,
+                                             phone_home_behavior, phone_away_behavior),
+                         routines.RoutineConfig('TV Routine', is_vizio_connected, 1,
+                                                vizio_on_behavior, vizio_off_behavior)])
 
 
 if __name__ == "__main__":
-    main()
+     main()

@@ -1,4 +1,5 @@
 from pyvizio import VizioAsync
+import asyncio
 import ApiService as api
 
 
@@ -6,6 +7,14 @@ async def scan_vizio(timeout=5):
     print('Scanning for vizio device(s). This could take a moment.')
     devices = VizioAsync.discovery_zeroconf(timeout)
     return devices
+
+
+def scan_and_get_device(timeout=5):
+    loop = asyncio.get_event_loop()
+    devices = loop.run_until_complete(scan_vizio())
+    d = devices[0]
+    auth_token = pair(d)
+    return d.ip, d.port, auth_token
 
 
 # TODO - device id should not be hardcoded
@@ -52,4 +61,22 @@ def is_power_on(ip, port, auth_token):
     try:
         return api.get(url, headers=headers).json()['ITEMS'][0]['VALUE'] == 1
     except Exception as e:
-        print('AWW SHIT: {}'.format(e))
+        print('Oh no: {}'.format(e))
+        
+        
+def get_selected_input(ip, port, auth_token):
+    url = 'https://{}:{}/menu_native/dynamic/tv_settings/devices/current_input'.format(ip, port)
+    headers = {"AUTH": auth_token}
+    try:
+        return api.get(url, headers=headers).json()
+    except Exception as e:
+        print('Oh no: {}'.format(e))
+        
+        
+def get_current_scene(ip, port, auth_token):
+    url = 'https://{}:{}/menu_native/dynamic/tv_settings/devices/current_input'.format(ip, port)
+    headers = {"AUTH": auth_token}
+    try:
+        return api.get(url, headers=headers).json()
+    except Exception as e:
+        print('Oh no: {}'.format(e))
