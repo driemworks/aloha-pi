@@ -99,7 +99,6 @@ def load_data(vizio_data_path, timeout):
         vizio_ip = vizio_data[0].replace('\n', '')
         vizio_port = vizio_data[1].replace('\n', '')
         vizio_token = vizio_data[2].replace('\n', '')
-        print('*IP: {}'.format(vizio_ip))
         return vizio_ip, vizio_port, vizio_token
     else:
         vizio_ip, vizio_port, vizio_token = scan_and_get_device()

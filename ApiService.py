@@ -2,8 +2,6 @@ import requests
 
 
 def get(url, headers):
-    print(url)
-    print(headers)
     try:
         return requests.get(url, headers=headers, verify=False)
     except Exception as e:

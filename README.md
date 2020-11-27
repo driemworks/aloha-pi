@@ -13,10 +13,15 @@ Aloha is a simple IoT application to allow automation of Philips Hue lights base
 
 ## TODOS
 - [-] raspberry-pi configuration script
+    - bluetooth config:
+       - pi@raspberrypi:~/work/aloha $ sudo mkdir /etc/systemd/system/bluetooth.service.d/
+pi@raspberrypi:~/work/aloha $ sudo touch /etc/systemd/system/bluetooth.service.d/01-disable-sap-plugin.conf
+pi@raspberrypi:~/work/aloha $ sudo nano /etc/systemd/system/bluetooth.service.d/01-disable-sap-plugin.conf
     - pybluez: 
         - sudo apt-get install libbluetooth-dev
         - sudo apt-get install python3-dev
-        - sudo pip3 install PyBluez
+        - python3 -m pip install PyBluez
+        - python3 -m pip install pygattlib
     - nmap
 - [-] verify ssl is disabled for https requests - security vulnerability
 - [-] yaml based routine configuration

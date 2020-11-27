@@ -10,6 +10,7 @@ import VizioService as vs
 from pyvizio import VizioAsync
 import ApiService as api
 import routines
+import BluetoothService as bt
 
 # my ip address
 my_phone_ip = '192.168.1.220'
@@ -38,22 +39,13 @@ def phone_away_behavior():
     
     
 def vizio_on_behavior():
-    # check if there is a currently selected scene - this will be important for
-    # the vizio_off_behavior later one
-    #global current_scene_action
-    #current_scene_action = hueService.get_current_scene()['action']
-    #print(current_scene_action)
-    #if vizioService.get_selected_input()['ITEMS'][0]['VALUE'] == 'cast':
-    #    set_scene('theater')
-    #else:
-    #    set_scene('game')
-    set_scene('game')
+    if vizioService.get_selected_input()['ITEMS'][0]['VALUE'] == 'cast':
+        set_scene('theater')
+    else:
+        set_scene('game')
     
 
 def vizio_off_behavior():
-    print('turning vizio off')
-    #print(current_scene_action)
-    #hueService.apply_action(bridge_ip, username, current_scene_action)
     set_scene('Relax')
 
 
