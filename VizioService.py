@@ -1,8 +1,46 @@
 from pyvizio import VizioAsync
 import asyncio
 import ApiService as api
+from os import path
 
 
+class VizioService():
+    
+    
+    def __init__(self, data_path='vizio.txt', timeout=1):
+        ip, port, auth_token = load_data(data_path, timeout)
+        self.ip = ip
+        self.port = port
+        self.auth_token = auth_token
+        
+        # TODO - this is assuming there is a single vizio device
+    def is_power_on(self):
+        url = 'https://{}:{}/state/device/power_mode'.format(self.ip, self.port)
+        headers = {"AUTH": self.auth_token}
+        try:
+            return api.get(url, headers=headers).json()['ITEMS'][0]['VALUE'] == 1
+        except Exception as e:
+            print('Oh no: {}'.format(e))
+            
+            
+    def get_selected_input(self):
+        url = 'https://{}:{}/menu_native/dynamic/tv_settings/devices/current_input'.format(self.ip, self.port)
+        headers = {"AUTH": self.auth_token}
+        try:
+            return api.get(url, headers=headers).json()
+        except Exception as e:
+            print('Oh no: {}'.format(e))
+            
+            
+    def get_current_scene(self):
+        url = 'https://{}:{}/menu_native/dynamic/tv_settings/devices/current_input'.format(self.ip, self.port)
+        headers = {"AUTH": self.auth_token}
+        try:
+            return api.get(url, headers=headers).json()
+        except Exception as e:
+            print('Oh no: {}'.format(e))
+
+    
 async def scan_vizio(timeout=5):
     print('Scanning for vizio device(s). This could take a moment.')
     devices = VizioAsync.discovery_zeroconf(timeout)
@@ -51,32 +89,24 @@ def pair(d):
                 {
                     'DEVICE_NAME': 'ALOHA',
                     'DEVICE_ID': '123456'
-                })  
+                })
 
-
-# TODO - this is assuming there is a single vizio device
-def is_power_on(ip, port, auth_token):
-    url = 'https://{}:{}/state/device/power_mode'.format(ip, port)
-    headers = {"AUTH": auth_token}
-    try:
-        return api.get(url, headers=headers).json()['ITEMS'][0]['VALUE'] == 1
-    except Exception as e:
-        print('Oh no: {}'.format(e))
-        
-        
-def get_selected_input(ip, port, auth_token):
-    url = 'https://{}:{}/menu_native/dynamic/tv_settings/devices/current_input'.format(ip, port)
-    headers = {"AUTH": auth_token}
-    try:
-        return api.get(url, headers=headers).json()
-    except Exception as e:
-        print('Oh no: {}'.format(e))
-        
-        
-def get_current_scene(ip, port, auth_token):
-    url = 'https://{}:{}/menu_native/dynamic/tv_settings/devices/current_input'.format(ip, port)
-    headers = {"AUTH": auth_token}
-    try:
-        return api.get(url, headers=headers).json()
-    except Exception as e:
-        print('Oh no: {}'.format(e))
+def load_data(vizio_data_path, timeout):
+    if path.exists(vizio_data_path):
+        print('Reading locally stored vizio data')
+        vizio_data_file = open(vizio_data_path)
+        vizio_data =  vizio_data_file.readlines()
+        vizio_ip = vizio_data[0].replace('\n', '')
+        vizio_port = vizio_data[1].replace('\n', '')
+        vizio_token = vizio_data[2].replace('\n', '')
+        print('*IP: {}'.format(vizio_ip))
+        return vizio_ip, vizio_port, vizio_token
+    else:
+        vizio_ip, vizio_port, vizio_token = scan_and_get_device()
+        vizio_data_file = open(vizio_data_path, 'x')
+        vizio_data_file.write(str(vizio_ip))
+        vizio_data_file.write('\n')
+        vizio_data_file.write(str(vizio_port))
+        vizio_data_file.write('\n')
+        vizio_data_file.write(str(vizio_token))
+        return vizio_ip, vizio_port, vizio_token

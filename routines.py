@@ -1,16 +1,6 @@
 import asyncio
 import time
-import HueService as hs
 
-
-class HueConfig():
-    
-    
-    def __init__(self, bridge_ip, username, scenes):
-        self.bridge_ip = bridge_ip
-        self.username = username
-        self.scenes = scenes
-        
         
 class RoutineConfig():
     
@@ -24,7 +14,7 @@ class RoutineConfig():
         self.away_behavior = away_behavior
 
 
-def continuous_monitoring_multiple(hue_config, routines):
+def continuous_monitoring(routines):
     print('Start monitoring')
     prev_state_array = [None] * len(routines)
     # initialize state for each routine
@@ -32,7 +22,6 @@ def continuous_monitoring_multiple(hue_config, routines):
         prev_state_array[i] = {'state': False, 'fault_count': 0}
 
     sleep_time = 2
-    scenes = hue_config.scenes
     while True:
         # check statuses every 'sleep_time' ms
         time.sleep(sleep_time)
@@ -44,7 +33,6 @@ def continuous_monitoring_multiple(hue_config, routines):
                     print('Goodbye ' + r.name)
                     prev_state_array[idx]['fault_count'] += 1
                     prev_state_array[idx]['state'] = curr_state
-                    #hs.set_scene(hue_config.bridge_ip, hue_config.username, scenes[r.away_scene], True)
                     r.away_behavior()
                 if prev_state_array[idx]['fault_count'] < r.fault_tolerance[0]:
                     # disconnected but awaiting fault tolerance check
@@ -55,7 +43,6 @@ def continuous_monitoring_multiple(hue_config, routines):
                     # device is_connected callback says a connection was established
                     print('Hello ' + r.name)
                     r.home_behavior()
-                    #hs.set_scene(hue_config.bridge_ip, hue_config.username, scenes[r.home_scene], True)
 
                 prev_state_array[idx]['state'] = curr_state
  
