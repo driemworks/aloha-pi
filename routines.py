@@ -5,7 +5,7 @@ import time
 class RoutineConfig():
     
 
-    def __init__(self, name, connection_status_callback, fault_tolerance,
+    def __init__(self, name, fault_tolerance, connection_status_callback,
              home_behavior, away_behavior):
         self.name = name
         self.connection_status_callback = connection_status_callback
@@ -14,7 +14,7 @@ class RoutineConfig():
         self.away_behavior = away_behavior
 
 
-def continuous_monitoring(routines):
+def continuous_monitoring(callbacks, routines):
     print('Start monitoring')
     prev_state_array = [None] * len(routines)
     # initialize state for each routine
@@ -26,14 +26,14 @@ def continuous_monitoring(routines):
         # check statuses every 'sleep_time' ms
         time.sleep(sleep_time)
         for idx, r in enumerate(routines, start=0):
-            curr_state = r.connection_status_callback()
+            curr_state = getattr(callbacks, r.connection_status_callback)()
             if curr_state is False:
                 if prev_state_array[idx]['fault_count'] == r.fault_tolerance[0] - 1:
                     # away behavior
                     print('Goodbye ' + r.name)
                     prev_state_array[idx]['fault_count'] += 1
                     prev_state_array[idx]['state'] = curr_state
-                    r.away_behavior()
+                    getattr(callbacks, r.away_behavior)()
                 if prev_state_array[idx]['fault_count'] < r.fault_tolerance[0]:
                     # disconnected but awaiting fault tolerance check
                     prev_state_array[idx]['fault_count'] += 1
@@ -42,7 +42,7 @@ def continuous_monitoring(routines):
                 if prev_state_array[idx]['state'] is False:
                     # device is_connected callback says a connection was established
                     print('Hello ' + r.name)
-                    r.home_behavior()
+                    getattr(callbacks, r.home_behavior)()
 
                 prev_state_array[idx]['state'] = curr_state
  

@@ -50,6 +50,7 @@ async def scan_vizio(timeout=5):
 def scan_and_get_device(timeout=5):
     loop = asyncio.get_event_loop()
     devices = loop.run_until_complete(scan_vizio())
+    print(devices)
     d = devices[0]
     auth_token = pair(d)
     return d.ip, d.port, auth_token
