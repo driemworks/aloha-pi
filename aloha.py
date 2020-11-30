@@ -51,21 +51,25 @@ def vizio_off_behavior():
 def set_scene(name):
     hueService.set_scene(scenes_dict[name])
     
-
-def load_routines():
+    
+def load_yaml(path):
     path = 'config.yml'
     routines_out = []
     with open(path) as file:
-        config_data = yaml.load(file, Loader=yaml.FullLoader)
-        if config_data is not None:
-            rs = config_data['routines']
-            for r in rs:
-                routines_out.append(
-                    routines.RoutineConfig(r['name'],
-                                           r['fault_tolerance'],
-                                           r['status_callback'],
-                                           r['status_true_callback'],
-                                           r['status_false_callback']))
+        return yaml.load(file, Loader=yaml.FullLoader)
+
+
+def load_routines(config_data):
+    routines_out = []
+    if config_data is not None:
+        rs = config_data['routines']
+        for r in rs:
+            routines_out.append(
+                routines.RoutineConfig(r['name'],
+                                       r['fault_tolerance'],
+                                       r['status_callback'],
+                                       r['status_true_callback'],
+                                       r['status_false_callback']))
     return routines_out
                 
         
@@ -76,8 +80,10 @@ def main():
     global vizioService
     hueService = hs.HueService()
     vizioService = vs.VizioService()
+    config_data = load_yaml('config.yml')
+    print(config_data)
     # my ip address
-    my_phone_ip = '192.168.1.220'
+    my_phone_ip = config_data['device'][0]['ip']
     nmap = nmap3.NmapScanTechniques()
     # load scenes
     scenes = hueService.get_scenes()
@@ -86,12 +92,7 @@ def main():
          scenes_dict[scenes[s]['name']] = s
 
     clback = callbacks.Callbacks(hueService, vizioService, nmap, scenes_dict, my_phone_ip)
-    #routines.continuous_monitoring(routines=[
-    #    routines.RoutineConfig('Phone Routine', is_connected, 2, phone_home_behavior,
-    #                           phone_away_behavior),
-    #    routines.RoutineConfig('TV Routine', is_vizio_connected, 1,
-    #                           vizio_on_behavior, vizio_off_behavior)])
-    routines.continuous_monitoring(clback, routines=load_routines())
+    routines.continuous_monitoring(clback, routines=load_routines(config_data))
 
 
 if __name__ == "__main__":
