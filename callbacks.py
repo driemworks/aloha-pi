@@ -12,8 +12,6 @@ from pyvizio import VizioAsync
 import ApiService as api
 import routines
 
-# my ip address
-my_phone_ip = '192.168.1.220'
 nmap = nmap3.NmapScanTechniques()
 
 class Callbacks():
