@@ -1,19 +1,15 @@
-import os
 import yaml
-from os import path
 import nmap3
-import HueService as hs
-import VizioService as vs
-import routines
-import callbacks
+from aloha import callbacks, HueService as hs, VizioService as vs, routines
 
 scenes_dict = {}
 current_scene_action = {}
 vizioService = None
 hueService = None
-    
+
+
 def load_yaml(path):
-    path = 'config.yml'
+    path = '../config.yml'
     routines_out = []
     with open(path) as file:
         return yaml.load(file, Loader=yaml.FullLoader)
@@ -32,15 +28,13 @@ def load_routines(config_data):
                                        r['status_false_callback']))
     return routines_out
                 
-        
-
 
 def main():
     global hueService
     global vizioService
     hueService = hs.HueService()
     vizioService = vs.VizioService()
-    config_data = load_yaml('config.yml')
+    config_data = load_yaml('../config.yml')
     print(config_data)
     # my ip address
     device_ip = config_data['device'][0]['ip']
@@ -53,7 +47,6 @@ def main():
 
     clback = callbacks.Callbacks(hueService, vizioService, nmap, scenes_dict, device_ip)
     routines.continuous_monitoring(clback, routines=load_routines(config_data))
-
 
 
 if __name__ == "__main__":

@@ -1,13 +1,13 @@
 from pyvizio import VizioAsync
 import asyncio
-import ApiService as api
+from aloha import ApiService as api
 from os import path
 
 
 class VizioService():
     
     
-    def __init__(self, data_path='vizio.txt', timeout=1):
+    def __init__(self, data_path='../vizio.txt', timeout=1):
         ip, port, auth_token = load_data(data_path, timeout)
         self.ip = ip
         self.port = port

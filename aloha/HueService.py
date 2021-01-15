@@ -3,7 +3,7 @@ from os import path
 
 class HueService():
     
-    def __init__(self, data_path='hue_config.txt'):
+    def __init__(self, data_path='../hue_config.txt'):
         ip, username = load_data(data_path)
         #scenes = authorized_get('scenes')
         #scenes_dict = {}
