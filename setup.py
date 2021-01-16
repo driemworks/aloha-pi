@@ -10,7 +10,7 @@ setup(name='aloha',
       packages=['aloha'],
       install_requires=[
           'python3-nmap',
-          'yaml',
+          'pyyaml',
           'pyvizio',
           'requests'
       ]

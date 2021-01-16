@@ -1,0 +1,30 @@
+######################################################################################
+# A routine is a python object which controls the behavior of philips hue lights
+# based on input from a series of functions.
+#
+#routines: The array of routines
+#    - name: The name of the routine
+#      status:          The callback (no parameters) with boolean output
+#                       which determines which callback will be invoked.
+#                       If TRUE then status_on will be invoked.
+#                       If FALSE then status_off will be invoked
+#                       after 'fault_tolerance'failures
+#              
+#      status_on:       The parameterless callback to be invoked when status = true
+#      status_off:      The parameterless callback to be invoked when status = false    
+#      fault_tolerance: If status = false for fault_tolerance number of times,
+#                       then status_off is invoke
+######################################################################################
+device:
+  - ip: 192.168.1.220 
+routines:
+  - name: 'TV Routine'
+    status_callback: is_connected
+    status_true_callback: phone_home_behavior
+    status_false_callback: phone_away_behavior
+    fault_tolerance: 3
+  - name: 'Mobile Routine'
+    status_callback: is_vizio_connected
+    status_true_callback: vizio_on_behavior
+    status_false_callback: vizio_off_behavior
+    fault_tolerance: 1

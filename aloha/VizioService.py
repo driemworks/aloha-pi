@@ -68,8 +68,6 @@ def pair(d):
         })
     if res.status_code == 200:
         try:
-            # TODO - if multiple requests for pairing made before vizio timeout
-            # then request will be blocked - should handle this
             pin = input('Enter the PIN displayed on your vizio device: ')
             challenge_res_url = base_url + '/pairing/pair'
             challenge_res = api.put(challenge_res_url, headers,
@@ -92,7 +90,7 @@ def pair(d):
                     'DEVICE_ID': '123456'
                 })
 
-def load_data(vizio_data_path, timeout):
+def load_data(vizio_data_path):
     if path.exists(vizio_data_path):
         print('Reading locally stored vizio data')
         vizio_data_file = open(vizio_data_path)
