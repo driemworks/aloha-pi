@@ -60,6 +60,10 @@ clock = Clock()
 # greeting_label = Label(root, text="Hello, Tony", bg='black', fg='white', font='none 24 bold')
 # greeting_label.config(anchor=CENTER)
 # greeting_label.pack()
-BluetoothService.list_connected_devices()
+connected_devices = BluetoothService.list_connected_devices()
+
+for c in connected_devices:
+    print(c)
+
 app = Application(master=root)
 app.mainloop()
