@@ -1,4 +1,4 @@
-from tkinter import *
+import tkinter as tk
 import queue
 from datetime import datetime
 import threading
@@ -10,10 +10,10 @@ class Clock:
     def __init__(self):
         self.time = datetime.now().strftime("%B %d, %Y %H:%M:%S")
         # self.time = time.strftime('%H:%M:%S')
-        self.mFrame = Frame()
+        self.mFrame = tk.Frame()
         # self.mFrame.pack(side=TOP, anchor=NW, expand=YES, fill=X)
-        self.mFrame.pack(side=TOP, anchor=NW)
-        self.watch = Label(self.mFrame, bg='black', fg='white',
+        self.mFrame.pack(side=tk.TOP, anchor=tk.NW)
+        self.watch = tk.Label(self.mFrame, bg='black', fg='white',
                            text=self.time, font=('times', 12, 'bold'))
         self.watch.pack()
         self.updateTimeLabel()
@@ -24,14 +24,14 @@ class Clock:
         self.watch.configure(text=self.time)
         self.mFrame.after(200, self.updateTimeLabel)
 
-class Application(Frame):
+class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
         self.pack()
 
 
-root = Tk()
+root = tk.Tk()
 # set background to black
 root.title('Aloha')
 root.configure(bg='black')
@@ -60,10 +60,10 @@ clock = Clock()
 # greeting_label = Label(root, text="Hello, Tony", bg='black', fg='white', font='none 24 bold')
 # greeting_label.config(anchor=CENTER)
 # greeting_label.pack()
-connected_devices = BluetoothService.list_connected_devices()
-
-for c in connected_devices:
-    print(c)
+# connected_devices = BluetoothService.list_connected_devices()
+#
+# for c in connected_devices:
+#     print(c)
 
 app = Application(master=root)
 app.mainloop()
