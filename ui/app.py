@@ -27,6 +27,7 @@ class Clock:
 
 class RefreshLabel:
     def __init__(self, side, anchor, generator_callback, refresh_time=200):
+        self.refresh_time = refresh_time
         self.message = generator_callback()
         self.mFrame = Frame()
         self.mFrame.pack(side=side, anchor=anchor)
@@ -37,7 +38,7 @@ class RefreshLabel:
     def update(self, generator_callback):
         self.message = generator_callback()
         self.dynamic_label.configure(text=self.message)
-        self.mFrame.after(self.update_time, self.dynamic_label)
+        self.mFrame.after(self.refresh_time, self.dynamic_label)
 
 
 class Application(Frame):
