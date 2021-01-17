@@ -1,12 +1,10 @@
-import pydbus
+import dbus
 
-bus = pydbus.SystemBus()
-adapter = bus.get('org.bluez', '/org/bluez/hci0')
-manager = bus.get( 'org.bluez', '/')
-
+bus = dbus.SystemBus()
+proxy_object = bus.get_object('org.bluez', "/")
+manager = dbus.Interface(proxy_object, "org.freedesktop.DBus.ObjectManager")
 
 dev_1 = 'org.bluez.Device1'
-
 
 def list_connected_devices():
     connected_devices = []
