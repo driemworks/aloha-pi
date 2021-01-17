@@ -38,7 +38,7 @@ class RefreshLabel:
     def update(self, generator_callback):
         self.message = generator_callback()
         self.dynamic_label.configure(text=self.message)
-        self.mFrame.after(self.refresh_time, self.dynamic_label)
+        self.mFrame.after(self.refresh_time, self.update(generator_callback))
 
 
 class Application(Frame):
