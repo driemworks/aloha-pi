@@ -67,8 +67,8 @@ def update_clock():
 t = threading.Thread(target=callback)
 t.daemon = True
 t.start()
-clock = RefreshLabel(side=CENTER, anchor=NW,
-                     generator_callback=datetime.now().strftime("%B %d, %Y %H:%M:%S"))
+clock = RefreshLabel(side=TOP, anchor=NW,
+                     generator_callback=update_clock)
 # Display current date and time
 # datetime_label = Label(root, text=datetime.now(), bg="black", fg="white", font="none 24 bold")
 # datetime_label.config(anchor='e')
