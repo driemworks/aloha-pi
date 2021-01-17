@@ -31,20 +31,21 @@ class Clock:
 
 
 class RefreshLabel:
-    def __init__(self, side, anchor, generator_callback, refresh_time=200):
-        self.refresh_time = refresh_time
+    def __init__(self, generator_callback):
         self.generator_callback = generator_callback
-        self.message = self.generator_callback()
+        self.time = self.generator_callback()
         self.mFrame = Frame()
-        self.mFrame.pack(side=side, anchor=anchor)
-        self.dynamic_label = Label(self.mFrame, bg='black', fg='white',
-                                   text=self.message, font=('times', 12, 'bold'))
-        self.update()
+        self.mFrame.pack(side=TOP, anchor=NW)
+        self.watch = Label(self.mFrame, bg='black', fg='white',
+                           text=self.time, font=('times', 12, 'bold'))
+        self.watch.pack()
+        self.updateTimeLabel()
 
-    def update(self):
-        self.message = self.generator_callback()
-        self.dynamic_label.configure(text=self.message)
-        self.mFrame.after(self.refresh_time, self.update)
+
+    def updateTimeLabel(self):
+        self.time = self.generator_callback()
+        self.watch.configure(text=self.time)
+        self.mFrame.after(200, self.updateTimeLabel)
 
 class Application(Frame):
     def __init__(self, master=None):
@@ -75,8 +76,7 @@ def update_clock():
 t = threading.Thread(target=callback)
 t.daemon = True
 t.start()
-clock = RefreshLabel(side=TOP, anchor=NW,
-                     generator_callback=update_clock)
+clock = RefreshLabel(update_clock)
 
 clock_test = Clock()
 # Display current date and time
