@@ -24,6 +24,22 @@ class Clock:
         self.watch.configure(text=self.time)
         self.mFrame.after(200, self.updateTimeLabel)
 
+
+class RefreshLabel:
+    def __init__(self, side, anchor, generator_callback, refresh_time=200):
+        self.message = generator_callback()
+        self.mFrame = Frame()
+        self.mFrame.pack(side=side, anchor=anchor)
+        self.dynamic_label = Label(self.mFrame, bg='black', fg='white',
+                                   text=self.message, font=('times', 12, 'bold'))
+        self.update(generator_callback)
+
+    def update(self, generator_callback):
+        self.message = generator_callback()
+        self.dynamic_label.configure(text=self.message)
+        self.mFrame.after(self.update_time, self.dynamic_label)
+
+
 class Application(Frame):
     def __init__(self, master=None):
         super().__init__(master)
@@ -41,18 +57,18 @@ flash = Flash.Flash(root)
 
 
 def callback():
-    import time
     flash.write('Hello, Tony')
-    # time.sleep(2)
-    # flash.write('The current temperature inside is: 22 C')
-    # flash.write('The current humidity inside is: 33.8')
-    # time.sleep(2)
+
+
+def update_clock():
+    return datetime.now().strftime("%B %d, %Y %H:%M:%S")
 
 
 t = threading.Thread(target=callback)
 t.daemon = True
 t.start()
-clock = Clock()
+clock = RefreshLabel(side=CENTER, anchor=NW,
+                     generator_callback=datetime.now().strftime("%B %d, %Y %H:%M:%S"))
 # Display current date and time
 # datetime_label = Label(root, text=datetime.now(), bg="black", fg="white", font="none 24 bold")
 # datetime_label.config(anchor='e')
@@ -61,9 +77,11 @@ clock = Clock()
 # greeting_label.config(anchor=CENTER)
 # greeting_label.pack()
 connected_devices = BluetoothService.list_connected_devices()
+# for now, just assume a single connected device
+single_device = connected_devices[0]
+# display name of connected device
+connected_device_label = Label(root, text='', bg='black', fg='white', font='none 24 bold')
 
-for c in connected_devices:
-     print(c)
 
 app = Application(master=root)
 app.mainloop()
