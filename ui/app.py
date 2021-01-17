@@ -1,4 +1,4 @@
-import tkinter as tk
+from tkinter import *
 import queue
 from datetime import datetime
 import threading
@@ -10,10 +10,10 @@ class Clock:
     def __init__(self):
         self.time = datetime.now().strftime("%B %d, %Y %H:%M:%S")
         # self.time = time.strftime('%H:%M:%S')
-        self.mFrame = tk.Frame()
+        self.mFrame = Frame()
         # self.mFrame.pack(side=TOP, anchor=NW, expand=YES, fill=X)
-        self.mFrame.pack(side=tk.TOP, anchor=tk.NW)
-        self.watch = tk.Label(self.mFrame, bg='black', fg='white',
+        self.mFrame.pack(side=TOP, anchor=NW)
+        self.watch = Label(self.mFrame, bg='black', fg='white',
                            text=self.time, font=('times', 12, 'bold'))
         self.watch.pack()
         self.updateTimeLabel()
@@ -24,14 +24,14 @@ class Clock:
         self.watch.configure(text=self.time)
         self.mFrame.after(200, self.updateTimeLabel)
 
-class Application(tk.Frame):
+class Application(Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
         self.pack()
 
 
-root = tk.Tk()
+root = Tk()
 # set background to black
 root.title('Aloha')
 root.configure(bg='black')
