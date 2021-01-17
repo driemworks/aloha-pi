@@ -10,12 +10,12 @@ def list_connected_devices():
     connected_devices = []
     managed_objects = manager.GetManagedObjects()
     for path in managed_objects:
-        is_connected = managed_objects[path].get(dev_1, {}).get('Connected', False)
+        device = managed_objects[path].get(dev_1, {})
+        is_connected = device.get('Connected', False)
         if is_connected:
-            connected_device = managed_objects[path].get(dev_1, {})
-            connected_devices.append(connected_device)
-            addr = connected_device.get('Address')
-            name = connected_device.get('Name')
+            connected_devices.append(device)
+            addr = device.get('Address')
+            name = device.get('Name')
             print(f'Device {name} [{addr}] is connected')
 
     return connected_devices
