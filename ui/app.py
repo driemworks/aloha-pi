@@ -4,6 +4,11 @@ from datetime import datetime
 import threading
 from components import Flash
 from service import BluetoothService
+import sys
+
+def onEscape(event=None):
+	print('Goodbye')
+	sys.exit()
 
 
 class Clock:
@@ -28,18 +33,18 @@ class Clock:
 class RefreshLabel:
     def __init__(self, side, anchor, generator_callback, refresh_time=200):
         self.refresh_time = refresh_time
-        self.message = generator_callback()
+        self.generator_callback = generator_callback
+        self.message = self.generator_callback()
         self.mFrame = Frame()
         self.mFrame.pack(side=side, anchor=anchor)
         self.dynamic_label = Label(self.mFrame, bg='black', fg='white',
                                    text=self.message, font=('times', 12, 'bold'))
-        self.update(generator_callback)
+        self.update()
 
-    def update(self, generator_callback):
-        self.message = generator_callback()
+    def update(self):
+        self.message = self.generator_callback()
         self.dynamic_label.configure(text=self.message)
-        self.mFrame.after(self.refresh_time, self.update(generator_callback))
-
+        self.mFrame.after(self.refresh_time, self.update)
 
 class Application(Frame):
     def __init__(self, master=None):
@@ -49,10 +54,12 @@ class Application(Frame):
 
 
 root = Tk()
-# set background to black
+# NOTE: bind escape key to ("-fullscreen", False)
+root.attributes("-fullscreen", True)
 root.title('Aloha')
 root.configure(bg='black')
-root.geometry('1000x1000')
+root.geometry('500x500')
+root.bind('<Escape>', onEscape)  
 
 flash = Flash.Flash(root)
 
@@ -70,6 +77,8 @@ t.daemon = True
 t.start()
 clock = RefreshLabel(side=TOP, anchor=NW,
                      generator_callback=update_clock)
+
+clock_test = Clock()
 # Display current date and time
 # datetime_label = Label(root, text=datetime.now(), bg="black", fg="white", font="none 24 bold")
 # datetime_label.config(anchor='e')
@@ -77,11 +86,15 @@ clock = RefreshLabel(side=TOP, anchor=NW,
 # greeting_label = Label(root, text="Hello, Tony", bg='black', fg='white', font='none 24 bold')
 # greeting_label.config(anchor=CENTER)
 # greeting_label.pack()
-connected_devices = BluetoothService.list_connected_devices()
-# for now, just assume a single connected device
-single_device = connected_devices[0]
+#connected_devices = BluetoothService.list_connected_devices()
+#device_label_txt = 'No bluetooth devices found'
+#if len(connected_devices) > 0:
+	# for now, just assume a single connected device
+#	single_device = connected_devices[0]
+#	device_label_txt = 'Bluetooth device connected: ' + single_device.get('Name')
+
 # display name of connected device
-connected_device_label = Label(root, text='', bg='black', fg='white', font='none 24 bold')
+#connected_device_label = Label(root, text='', bg='black', fg='white', font='none 24 bold')
 
 
 app = Application(master=root)
