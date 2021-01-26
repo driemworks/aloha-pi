@@ -36,6 +36,7 @@ def continuous_monitoring(callbacks, routines):
                 if prev_state_array[idx]['fault_count'] == r.fault_tolerance[0] - 1:
                     # away behavior
                     print('Goodbye ' + r.name)
+                    client.pubsub.publish(r.name, '0')
                     prev_state_array[idx]['fault_count'] += 1
                     prev_state_array[idx]['state'] = curr_state
                     getattr(callbacks, r.away_behavior)()
@@ -46,8 +47,7 @@ def continuous_monitoring(callbacks, routines):
                 prev_state_array[idx]['fault_count'] = 0
                 if prev_state_array[idx]['state'] is False:
                     print('Publishing to topic  ' + r.name)
-                    client.pubsub.publish(r.name, 'Home')
-                    # device is_connected callback says a connection was established
+                    client.pubsub.publish(r.name, '1')
                     print('Hello ' + r.name)
                     getattr(callbacks, r.home_behavior)()
 
