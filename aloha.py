@@ -9,7 +9,7 @@ hueService = None
 
 
 def load_yaml(path):
-    path = '../config.yml'
+    path = 'config.yml'
     routines_out = []
     with open(path) as file:
         return yaml.load(file, Loader=yaml.FullLoader)
@@ -35,8 +35,6 @@ def main():
     hueService = hs.HueService()
     vizioService = vs.VizioService()
     config_data = load_yaml('../config.yml')
-    print(config_data)
-    # my ip address
     device_ip = config_data['device'][0]['ip']
     nmap = nmap3.NmapScanTechniques()
     # load scenes

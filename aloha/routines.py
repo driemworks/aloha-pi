@@ -1,9 +1,14 @@
+import ipfshttpclient
 import asyncio
 import time
+from datetime import datetime
 
-        
+
+client = ipfshttpclient.connect()
+
+
 class RoutineConfig():
-    
+
 
     def __init__(self, name, fault_tolerance, connection_status_callback,
              home_behavior, away_behavior):
@@ -40,6 +45,8 @@ def continuous_monitoring(callbacks, routines):
             else:
                 prev_state_array[idx]['fault_count'] = 0
                 if prev_state_array[idx]['state'] is False:
+                    print('Publishing to topic  ' + r.name)
+                    client.pubsub.publish(r.name, 'Home')
                     # device is_connected callback says a connection was established
                     print('Hello ' + r.name)
                     getattr(callbacks, r.home_behavior)()

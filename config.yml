@@ -18,13 +18,13 @@
 device:
   - ip: 192.168.1.220 
 routines:
-  - name: 'TV Routine'
+  - name: 'tony_mobile'
     status_callback: is_connected
     status_true_callback: phone_home_behavior
     status_false_callback: phone_away_behavior
     fault_tolerance: 3
-  - name: 'Mobile Routine'
-    status_callback: is_vizio_connected
-    status_true_callback: vizio_on_behavior
-    status_false_callback: vizio_off_behavior
-    fault_tolerance: 1
+#  - name: 'Mobile Routine'
+#    status_callback: is_vizio_connected
+#    status_true_callback: vizio_on_behavior
+#    status_false_callback: vizio_off_behavior
+#    fault_tolerance: 1

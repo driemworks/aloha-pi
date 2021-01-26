@@ -1,4 +1,5 @@
 import nmap3
+import re
 
 nmap = nmap3.NmapScanTechniques()
 
@@ -13,7 +14,8 @@ class Callbacks():
 
     def is_connected(self):
         results = nmap.nmap_ping_scan(self.phone_ip)
-        return results != [] and results is not None
+        # this is really hacky and needs to be fixed at some point
+        return '(1' in results['runtime']['summary']
 
 
     def is_vizio_connected(self):
